@@ -27,7 +27,8 @@ class NetworkError extends Error {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://api-buah-berak.garnusa.com';
 const DEFAULT_TIMEOUT = 30000;
 
 // Remove id fields before sending to API
