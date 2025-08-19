@@ -95,9 +95,9 @@ const AchievementForm: React.FC = () => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!achievement.judul.trim()) newErrors.judul = 'Judul prestasi wajib diisi';
+    if (!achievement.judul.trim()) newErrors.judul = 'Judul i wajib diisi';
     if (!selectedDate) newErrors.tahun = 'Tanggal prestasi wajib diisi';
-    if (achievement.mahasiswa.length === 0) newErrors.mahasiswa = 'Minimal satu mahasiswa wajib diisi';
+    if (achievement.mahasiswa.length === 0) newErrors.mahasiswa = 'Minimal satu prestasi wajib diisi';
     if (!achievement.deskripsi.trim()) newErrors.deskripsi = 'Deskripsi prestasi wajib diisi';
     if (!achievement.foto) newErrors.foto = 'Foto prestasi wajib diisi';
     
@@ -252,7 +252,7 @@ const AchievementForm: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Mahasiswa <span className="text-red-500">*</span>
+                Desa <span className="text-red-500">*</span>
               </label>
               
               {achievement.mahasiswa.length > 0 && (

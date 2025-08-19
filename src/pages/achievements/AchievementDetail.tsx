@@ -119,7 +119,7 @@ const AchievementDetail: React.FC = () => {
             <div className="flex items-start">
               <Users size={20} className="mr-2 mt-1 flex-shrink-0 text-indigo-600" />
               <div>
-                <p className="text-sm font-medium text-gray-500">Mahasiswa</p>
+                <p className="text-sm font-medium text-gray-500">Desa</p>
                 <div className="flex flex-wrap gap-1">
                   {achievement.mahasiswa.map((student: string, index: number) => (
                     <span 

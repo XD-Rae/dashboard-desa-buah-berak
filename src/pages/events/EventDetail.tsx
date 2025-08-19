@@ -97,7 +97,7 @@ const EventDetail: React.FC = () => {
       <div className="overflow-hidden rounded-lg bg-white shadow-md">
         <div className="relative h-64 w-full">
           <img 
-            src={event.foto || 'https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg'} 
+            src={event.foto || 'IMAGES.image19.jpg'} 
             alt={event.nama} 
             className="h-full w-full object-cover"
           />

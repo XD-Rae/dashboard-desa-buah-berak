@@ -39,7 +39,7 @@ const AchievementList: React.FC = () => {
   return (
     <div>
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Prestasi Mahasiswa</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Prestasi Desa</h1>
         <Link
           to="/achievements/new"
           className="mt-4 md:mt-0 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
@@ -55,7 +55,7 @@ const AchievementList: React.FC = () => {
           <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Cari berdasarkan judul, mahasiswa, atau deskripsi..."
+            placeholder="Cari berdasarkan judul, desa, atau deskripsi..."
             className="w-full rounded-md border border-gray-300 pl-10 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
