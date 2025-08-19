@@ -19,7 +19,7 @@ const Dashboard: React.FC = () => {
       <Link to={linkTo} className="block">
         <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center">
-            <div className={`flex-shrink-0 rounded-md p-3 ${bgColor}`}>
+            <div className={`flex-shrink-0 rounded-md p-2 ${bgColor}`}>
               {icon}
             </div>
             <div className="ml-5">
