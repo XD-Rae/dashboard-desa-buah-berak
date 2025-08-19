@@ -84,13 +84,6 @@ const Dashboard: React.FC = () => {
           linkTo="/faculty" 
         />
         <StatCard 
-          title="Total Prestasi" 
-          value={achievements.length} 
-          icon={<Award className="h-6 w-6 text-indigo-600" />} 
-          bgColor="bg-indigo-100" 
-          linkTo="/achievements" 
-        />
-        <StatCard 
           title="Total Kegiatan" 
           value={events.length} 
           icon={<Calendar className="h-6 w-6 text-purple-600" />} 
@@ -129,34 +122,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Prestasi Terbaru</h2>
-          </div>
-          <div className="p-4">
-            <ul className="divide-y divide-gray-200">
-              {achievements.slice(0, 5).map((a) => (
-                <li key={a.id} className="py-3">
-                  <Link to={`/achievements/${a.id}`} className="flex items-center hover:bg-gray-50 -mx-4 px-4 py-2 rounded-md transition-colors">
-                    <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                      <Award className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">{a.judul}</p>
-                      <p className="text-xs text-gray-500">{a.tahun}</p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4">
-              <Link to="/achievements" className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                Lihat semua prestasi
-              </Link>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
   );
 };

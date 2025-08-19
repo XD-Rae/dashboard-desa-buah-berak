@@ -70,11 +70,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             
             {user?.role === 'admin' && (
               <>
-                <NavLink to="/achievements" className={navLinkClass}>
-                  <Award size={20} />
-                  <span>Prestasi Desa</span>
-                </NavLink>
-                
                 <NavLink to="/events" className={navLinkClass}>
                   <Calendar size={20} />
                   <span>Data Kegiatan</span>
