@@ -1,23 +1,27 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { Plus, Search, Edit, Trash2, MessageSquare } from 'lucide-react';
-import toast from 'react-hot-toast';
-import ConfirmationDialog from '../../components/shared/ConfirmationDialog';
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {Plus, Search, Edit, Trash2, MessageSquare} from "lucide-react";
+import toast from "react-hot-toast";
+import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
 
 const TestimonialList: React.FC = () => {
-  const { testimonials, deleteTestimonial } = useCampusData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTestimonial, setSelectedTestimonial] = useState<{ _id: string; name: string } | null>(null);
+  const {testimonials, deleteTestimonial} = useDataContext();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTestimonial, setSelectedTestimonial] = useState<{
+    _id: string;
+    name: string;
+  } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const filteredTestimonials = testimonials.filter((testimonial) =>
-    testimonial.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    testimonial.pekerjaan.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    testimonial.perusahaan.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTestimonials = testimonials.filter(
+    (testimonial) =>
+      testimonial.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      testimonial.pekerjaan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      testimonial.perusahaan.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleDeleteClick = (testimonial: { _id: string; name: string }) => {
+  const handleDeleteClick = (testimonial: {_id: string; name: string}) => {
     setSelectedTestimonial(testimonial);
     setShowDeleteConfirm(true);
   };
@@ -27,12 +31,12 @@ const TestimonialList: React.FC = () => {
 
     try {
       await deleteTestimonial(selectedTestimonial._id);
-      toast.success('Testimoni berhasil dihapus');
+      toast.success("Testimoni berhasil dihapus");
       setShowDeleteConfirm(false);
       setSelectedTestimonial(null);
     } catch (error) {
-      console.error('Error deleting testimonial:', error);
-      toast.error('Gagal menghapus testimoni');
+      console.error("Error deleting testimonial:", error);
+      toast.error("Gagal menghapus testimoni");
     }
   };
 
@@ -52,7 +56,10 @@ const TestimonialList: React.FC = () => {
       {/* Search */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari berdasarkan nama, pekerjaan, atau perusahaan..."
@@ -80,11 +87,12 @@ const TestimonialList: React.FC = () => {
                       className="h-12 w-12 rounded-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
+                        target.style.display = "none";
                         const parent = target.parentElement;
                         if (parent) {
-                          const fallback = document.createElement('div');
-                          fallback.className = 'h-12 w-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-lg font-semibold';
+                          const fallback = document.createElement("div");
+                          fallback.className =
+                            "h-12 w-12 rounded-full bg-indigo-500 flex items-center justify-center text-white text-lg font-semibold";
                           fallback.textContent = testimonial.name.charAt(0);
                           parent.appendChild(fallback);
                         }
@@ -92,14 +100,22 @@ const TestimonialList: React.FC = () => {
                     />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">{testimonial.name}</h3>
-                    <p className="text-sm text-gray-500">Lulusan {testimonial.tahunlulus}</p>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Lulusan {testimonial.tahunlulus}
+                    </p>
                   </div>
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-900">{testimonial.pekerjaan}</p>
-                  <p className="text-sm text-gray-600">{testimonial.perusahaan}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {testimonial.pekerjaan}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {testimonial.perusahaan}
+                  </p>
                 </div>
 
                 <blockquote className="mb-4 border-l-4 border-indigo-500 pl-4 italic text-gray-700">
@@ -129,7 +145,9 @@ const TestimonialList: React.FC = () => {
       ) : (
         <div className="rounded-lg bg-white p-8 text-center shadow-md">
           <MessageSquare size={48} className="mx-auto mb-4 text-indigo-300" />
-          <h3 className="mb-2 text-xl font-medium text-gray-900">Tidak ada testimoni</h3>
+          <h3 className="mb-2 text-xl font-medium text-gray-900">
+            Tidak ada testimoni
+          </h3>
           <p className="mb-4 text-gray-600">
             Belum ada data testimoni yang tersedia atau sesuai dengan pencarian.
           </p>

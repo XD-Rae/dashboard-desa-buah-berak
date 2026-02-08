@@ -1,27 +1,40 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { Plus, Search, Edit, Trash2, FileText, Users, Calendar } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  FileText,
+  Users,
+  Calendar,
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 const IndustrialDesignList: React.FC = () => {
-  const { industrialDesigns = [], deleteIndustrialDesign } = useCampusData();
-  const [searchTerm, setSearchTerm] = useState('');
+  const {industrialDesigns = [], deleteIndustrialDesign} = useDataContext();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredDesigns = industrialDesigns.filter((design) =>
-    design.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    design.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    design.number.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredDesigns = industrialDesigns.filter(
+    (design) =>
+      design.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      design.authors.some((author) =>
+        author.toLowerCase().includes(searchTerm.toLowerCase()),
+      ) ||
+      design.number.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleDelete = async (_id: string, title: string) => {
-    if (window.confirm(`Anda yakin ingin menghapus desain industri "${title}"?`)) {
+    if (
+      window.confirm(`Anda yakin ingin menghapus desain industri "${title}"?`)
+    ) {
       try {
         await deleteIndustrialDesign(_id);
-        toast.success('Desain industri berhasil dihapus');
+        toast.success("Desain industri berhasil dihapus");
       } catch (error) {
-        console.error('Error deleting industrial design:', error);
-        toast.error('Gagal menghapus desain industri');
+        console.error("Error deleting industrial design:", error);
+        toast.error("Gagal menghapus desain industri");
       }
     }
   };
@@ -29,7 +42,9 @@ const IndustrialDesignList: React.FC = () => {
   return (
     <div>
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Data Desain Industri</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Data Desain Industri
+        </h1>
         <Link
           to="/industrial-designs/new"
           className="mt-4 md:mt-0 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
@@ -42,7 +57,10 @@ const IndustrialDesignList: React.FC = () => {
       {/* Search */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari berdasarkan judul, penulis, atau nomor..."
@@ -59,35 +77,59 @@ const IndustrialDesignList: React.FC = () => {
           <table className="min-w-full table-auto">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">No.</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Judul</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Nomor</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Penulis</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tanggal</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Akses</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  No.
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Judul
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Nomor
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Penulis
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Tanggal
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Akses
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Aksi
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredDesigns.map((design, index) => (
                 <tr key={design._id} className="border-t">
-                  <td className="px-4 py-2 text-sm text-gray-900">{index + 1}</td> {/* Serial Number */}
-                  <td className="px-4 py-2 text-sm text-gray-900">{design.title}</td>
-                  <td className="px-4 py-2 text-sm text-gray-900">{design.number}</td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {index + 1}
+                  </td>{" "}
+                  {/* Serial Number */}
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {design.title}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {design.number}
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
                     {design.authors.map((author, idx) => (
                       <div key={idx} className="flex items-start">
                         {/* Bullet Point before the author */}
                         <span className="mr-1 text-indigo-800 text-xs">
                           {/* Bullet point (•) */}
-                          {'• '}
+                          {"• "}
                           {author}
                         </span>
-                        {idx < design.authors.length - 1 && <br />} {/* Adds a line break between authors */}
+                        {idx < design.authors.length - 1 && <br />}{" "}
+                        {/* Adds a line break between authors */}
                       </div>
                     ))}
                   </td>
-                  <td className="px-4 py-2 text-sm text-gray-900">{design.date}</td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {design.date}
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
                     {design.driveUrl && (
                       <a
@@ -127,9 +169,12 @@ const IndustrialDesignList: React.FC = () => {
       ) : (
         <div className="rounded-lg bg-white p-8 text-center shadow-md">
           <FileText size={48} className="mx-auto mb-4 text-indigo-300" />
-          <h3 className="mb-2 text-xl font-medium text-gray-900">Tidak ada data desain industri</h3>
+          <h3 className="mb-2 text-xl font-medium text-gray-900">
+            Tidak ada data desain industri
+          </h3>
           <p className="mb-4 text-gray-600">
-            Belum ada data desain industri yang tersedia atau sesuai dengan pencarian.
+            Belum ada data desain industri yang tersedia atau sesuai dengan
+            pencarian.
           </p>
           <Link
             to="/industrial-designs/new"

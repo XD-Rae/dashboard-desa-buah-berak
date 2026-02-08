@@ -1,23 +1,29 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { Plus, Search, Eye, Edit, Trash2, Award } from 'lucide-react';
-import toast from 'react-hot-toast';
-import ConfirmationDialog from '../../components/shared/ConfirmationDialog';
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {Plus, Search, Eye, Edit, Trash2, Award} from "lucide-react";
+import toast from "react-hot-toast";
+import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
 
 const AchievementList: React.FC = () => {
-  const { achievements, deleteAchievement } = useCampusData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedAchievement, setSelectedAchievement] = useState<{ _id: string; judul: string } | null>(null);
+  const {achievements, deleteAchievement} = useDataContext();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedAchievement, setSelectedAchievement] = useState<{
+    _id: string;
+    judul: string;
+  } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const filteredAchievements = achievements.filter((achievement) =>
-    achievement.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    achievement.deskripsi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    achievement.mahasiswa.some(m => m.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredAchievements = achievements.filter(
+    (achievement) =>
+      achievement.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      achievement.deskripsi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      achievement.mahasiswa.some((m) =>
+        m.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
-  const handleDeleteClick = (achievement: { _id: string; judul: string }) => {
+  const handleDeleteClick = (achievement: {_id: string; judul: string}) => {
     setSelectedAchievement(achievement);
     setShowDeleteConfirm(true);
   };
@@ -27,12 +33,12 @@ const AchievementList: React.FC = () => {
 
     try {
       await deleteAchievement(selectedAchievement._id);
-      toast.success('Prestasi berhasil dihapus');
+      toast.success("Prestasi berhasil dihapus");
       setShowDeleteConfirm(false);
       setSelectedAchievement(null);
     } catch (error) {
-      console.error('Error deleting achievement:', error);
-      toast.error('Gagal menghapus prestasi');
+      console.error("Error deleting achievement:", error);
+      toast.error("Gagal menghapus prestasi");
     }
   };
 
@@ -52,7 +58,10 @@ const AchievementList: React.FC = () => {
       {/* Search */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari berdasarkan judul, desa, atau deskripsi..."
@@ -73,7 +82,7 @@ const AchievementList: React.FC = () => {
             >
               <div
                 className="h-48 w-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${achievement.foto})` }}
+                style={{backgroundImage: `url(${achievement.foto})`}}
               />
               <div className="p-4">
                 <h3 className="mb-2 text-lg font-medium text-gray-900 line-clamp-2">
@@ -85,7 +94,7 @@ const AchievementList: React.FC = () => {
                     {achievement.mahasiswa.map((student, index) => (
                       <span key={index} className="text-sm text-gray-600">
                         {student}
-                        {index < achievement.mahasiswa.length - 1 ? ', ' : ''}
+                        {index < achievement.mahasiswa.length - 1 ? ", " : ""}
                       </span>
                     ))}
                   </div>
@@ -125,9 +134,11 @@ const AchievementList: React.FC = () => {
       ) : (
         <div className="rounded-lg bg-white p-8 text-center shadow-md">
           <Award size={48} className="mx-auto mb-4 text-indigo-300" />
-          <h3 className="mb-2 text-xl font-medium text-gray-900">Tidak ada prestasi</h3>
+          <h3 className="mb-2 text-xl font-medium text-gray-900">
+            Tidak ada prestasi
+          </h3>
           <p className="mb-4 text-gray-600">
-            Belum ada data prestasi mahasiswa yang tersedia atau sesuai dengan pencarian.
+            Belum ada data prestasi yang tersedia atau sesuai dengan pencarian.
           </p>
           <Link
             to="/achievements/new"

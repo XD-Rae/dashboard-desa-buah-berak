@@ -1,14 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { ArrowLeft, Edit, Trash2, Calendar, MapPin, FileText } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { eventAPI } from '../../services/api';
+import React, {useEffect, useState} from "react";
+import {useParams, Link, useNavigate} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Calendar,
+  MapPin,
+  FileText,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import {eventAPI} from "../../services/api";
 
 const EventDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
-  const { deleteEvent } = useCampusData();
+  const {deleteEvent} = useDataContext();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,12 +24,12 @@ const EventDetail: React.FC = () => {
     const fetchEvent = async () => {
       try {
         setLoading(true);
-        const data = await eventAPI.getById(id || '');
+        const data = await eventAPI.getById(id || "");
         setEvent(data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching event:', err);
-        setError('Gagal memuat data kegiatan');
+        console.error("Error fetching event:", err);
+        setError("Gagal memuat data kegiatan");
       } finally {
         setLoading(false);
       }
@@ -44,9 +51,16 @@ const EventDetail: React.FC = () => {
   if (error || !event) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-semibold text-gray-900">Kegiatan tidak ditemukan</h2>
-        <p className="mt-2 text-gray-600">{error || 'Data kegiatan dengan ID tersebut tidak ditemukan.'}</p>
-        <Link to="/events" className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-800">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Kegiatan tidak ditemukan
+        </h2>
+        <p className="mt-2 text-gray-600">
+          {error || "Data kegiatan dengan ID tersebut tidak ditemukan."}
+        </p>
+        <Link
+          to="/events"
+          className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-800"
+        >
           <ArrowLeft size={16} className="mr-2" />
           Kembali ke daftar kegiatan
         </Link>
@@ -55,14 +69,16 @@ const EventDetail: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    if (window.confirm(`Anda yakin ingin menghapus kegiatan "${event.nama}"?`)) {
+    if (
+      window.confirm(`Anda yakin ingin menghapus kegiatan "${event.nama}"?`)
+    ) {
       try {
         await deleteEvent(event._id);
-        toast.success('Kegiatan berhasil dihapus');
-        navigate('/events');
+        toast.success("Kegiatan berhasil dihapus");
+        navigate("/events");
       } catch (error) {
-        console.error('Error deleting event:', error);
-        toast.error('Gagal menghapus kegiatan');
+        console.error("Error deleting event:", error);
+        toast.error("Gagal menghapus kegiatan");
       }
     }
   };
@@ -96,30 +112,34 @@ const EventDetail: React.FC = () => {
 
       <div className="overflow-hidden rounded-lg bg-white shadow-md">
         <div className="relative h-64 w-full">
-          <img 
-            src={event.foto || 'IMAGES.image19.jpg'} 
-            alt={event.nama} 
+          <img
+            src={event.foto || "IMAGES.image19.jpg"}
+            alt={event.nama}
             className="h-full w-full object-cover"
           />
         </div>
-        
+
         <div className="p-6">
-          <h2 className="mb-4 text-2xl font-bold text-gray-900">{event.nama}</h2>
-          
+          <h2 className="mb-4 text-2xl font-bold text-gray-900">
+            {event.nama}
+          </h2>
+
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="flex items-center">
               <Calendar size={20} className="mr-2 text-indigo-600" />
               <div>
                 <p className="text-sm font-medium text-gray-500">Tanggal</p>
-                <p className="text-gray-900">{new Date(event.tanggal).toLocaleDateString('id-ID', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}</p>
+                <p className="text-gray-900">
+                  {new Date(event.tanggal).toLocaleDateString("id-ID", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center">
               <MapPin size={20} className="mr-2 text-indigo-600" />
               <div>
@@ -128,13 +148,15 @@ const EventDetail: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="mb-6">
             <div className="mb-2 flex items-center">
               <FileText size={20} className="mr-2 text-indigo-600" />
               <p className="text-sm font-medium text-gray-500">Deskripsi</p>
             </div>
-            <p className="whitespace-pre-line text-gray-700">{event.deskripsi}</p>
+            <p className="whitespace-pre-line text-gray-700">
+              {event.deskripsi}
+            </p>
           </div>
         </div>
       </div>

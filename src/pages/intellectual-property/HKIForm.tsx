@@ -1,35 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { HKI } from '../../types';
-import DatePicker from 'react-datepicker';
+import React, {useState, useEffect} from "react";
+import {useParams, useNavigate, Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {ArrowLeft, Plus, Trash2} from "lucide-react";
+import toast from "react-hot-toast";
+import {HKI} from "../../types";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import ConfirmationDialog from '../../components/shared/ConfirmationDialog';
+import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
 
 const emptyHKI: HKI = {
-  _id: '',
-  title: '',
-  date: '',
-  number: '',
+  _id: "",
+  title: "",
+  date: "",
+  number: "",
   authors: [],
-  driveUrl: '',
+  driveUrl: "",
 };
 
 const HKIForm: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
-  const { addHKI, updateHKI, getHKIById } = useCampusData();
-  
+  const {addHKI, updateHKI, getHKIById} = useDataContext();
+
   const [hki, setHKI] = useState<HKI>(emptyHKI);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [newAuthor, setNewAuthor] = useState('');
+  const [newAuthor, setNewAuthor] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  
+
   const isEditing = !!id;
-  
+
   useEffect(() => {
     const fetchData = async () => {
       if (isEditing && id) {
@@ -39,13 +39,13 @@ const HKIForm: React.FC = () => {
             setHKI(existingHKI);
             setSelectedDate(new Date(existingHKI.date));
           } else {
-            navigate('/hki');
-            toast.error('HKI tidak ditemukan');
+            navigate("/hki");
+            toast.error("HKI tidak ditemukan");
           }
         } catch (error) {
-          console.error('Error fetching HKI:', error);
-          toast.error('Gagal mengambil data HKI');
-          navigate('/hki');
+          console.error("Error fetching HKI:", error);
+          toast.error("Gagal mengambil data HKI");
+          navigate("/hki");
         }
       }
     };
@@ -54,59 +54,60 @@ const HKIForm: React.FC = () => {
   }, [id, getHKIById, navigate, isEditing]);
 
   const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!hki.title.trim()) newErrors.title = 'Judul HKI wajib diisi';
-    if (!selectedDate) newErrors.date = 'Tanggal wajib diisi';
-    if (!hki.number.trim()) newErrors.number = 'Nomor HKI wajib diisi';
-    if (hki.authors.length === 0) newErrors.authors = 'Minimal satu penulis wajib diisi';
-    if (!hki.driveUrl.trim()) newErrors.driveUrl= 'URL wajib diisi';
-    
+
+    if (!hki.title.trim()) newErrors.title = "Judul HKI wajib diisi";
+    if (!selectedDate) newErrors.date = "Tanggal wajib diisi";
+    if (!hki.number.trim()) newErrors.number = "Nomor HKI wajib diisi";
+    if (hki.authors.length === 0)
+      newErrors.authors = "Minimal satu penulis wajib diisi";
+    if (!hki.driveUrl.trim()) newErrors.driveUrl = "URL wajib diisi";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setHKI((prev) => ({ ...prev, [name]: value }));
+    const {name, value} = e.target;
+    setHKI((prev) => ({...prev, [name]: value}));
   };
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
     if (date) {
-      setHKI(prev => ({
+      setHKI((prev) => ({
         ...prev,
-        date: formatDate(date)
+        date: formatDate(date),
       }));
     }
   };
 
   const handleAddAuthor = () => {
-    if (newAuthor.trim() !== '') {
+    if (newAuthor.trim() !== "") {
       setHKI((prev) => ({
         ...prev,
-        authors: [...prev.authors, newAuthor.trim()]
+        authors: [...prev.authors, newAuthor.trim()],
       }));
-      setNewAuthor('');
-      setErrors(prev => ({ ...prev, authors: undefined }));
+      setNewAuthor("");
+      setErrors((prev) => ({...prev, authors: undefined}));
     }
   };
 
   const handleRemoveAuthor = (index: number) => {
     setHKI((prev) => ({
       ...prev,
-      authors: prev.authors.filter((_, i) => i !== index)
+      authors: prev.authors.filter((_, i) => i !== index),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error('Periksa kembali inputan!');
+      toast.error("Periksa kembali inputan!");
       return;
     }
     setShowSaveConfirm(true);
@@ -116,14 +117,14 @@ const HKIForm: React.FC = () => {
     try {
       if (isEditing && id) {
         await updateHKI(id, hki);
-        toast.success('HKI berhasil diperbarui');
+        toast.success("HKI berhasil diperbarui");
       } else {
         await addHKI(hki);
-        toast.success('HKI berhasil ditambahkan');
+        toast.success("HKI berhasil ditambahkan");
       }
-      navigate('/hki');
+      navigate("/hki");
     } catch (err) {
-      toast.error('Terjadi kesalahan saat menyimpan data');
+      toast.error("Terjadi kesalahan saat menyimpan data");
     }
   };
 
@@ -134,7 +135,7 @@ const HKIForm: React.FC = () => {
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">
-          {isEditing ? 'Edit HKI' : 'Tambah HKI Baru'}
+          {isEditing ? "Edit HKI" : "Tambah HKI Baru"}
         </h1>
       </div>
 
@@ -142,7 +143,10 @@ const HKIForm: React.FC = () => {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Judul HKI <span className="text-red-500">*</span>
               </label>
               <input
@@ -152,14 +156,19 @@ const HKIForm: React.FC = () => {
                 value={hki.title}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.title ? 'border-red-300' : 'border-gray-300'
+                  errors.title ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
               />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Tanggal <span className="text-red-500">*</span>
               </label>
               <DatePicker
@@ -167,15 +176,20 @@ const HKIForm: React.FC = () => {
                 onChange={handleDateChange}
                 dateFormat="yyyy-MM-dd"
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.date ? 'border-red-300' : 'border-gray-300'
+                  errors.date ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
                 placeholderText="Pilih tanggal"
               />
-              {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date}</p>}
+              {errors.date && (
+                <p className="mt-1 text-sm text-red-600">{errors.date}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="number" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="number"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Nomor HKI <span className="text-red-500">*</span>
               </label>
               <input
@@ -185,22 +199,29 @@ const HKIForm: React.FC = () => {
                 value={hki.number}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.number ? 'border-red-300' : 'border-gray-300'
+                  errors.number ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
               />
-              {errors.number && <p className="mt-1 text-sm text-red-600">{errors.number}</p>}
+              {errors.number && (
+                <p className="mt-1 text-sm text-red-600">{errors.number}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Penulis <span className="text-red-500">*</span>
               </label>
-              
+
               {hki.authors.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2">
                   {hki.authors.map((author, index) => (
-                    <div key={index} className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1">
-                      <span className="text-sm font-medium text-indigo-800">{author}</span>
+                    <div
+                      key={index}
+                      className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1"
+                    >
+                      <span className="text-sm font-medium text-indigo-800">
+                        {author}
+                      </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveAuthor(index)}
@@ -212,21 +233,21 @@ const HKIForm: React.FC = () => {
                   ))}
                 </div>
               )}
-              
+
               <div className="flex">
                 <input
                   type="text"
                   value={newAuthor}
                   onChange={(e) => setNewAuthor(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddAuthor();
                     }
                   }}
                   placeholder="Nama penulis"
                   className={`block w-full rounded-l-md border ${
-                    errors.authors ? 'border-red-300' : 'border-gray-300'
+                    errors.authors ? "border-red-300" : "border-gray-300"
                   } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
                 />
                 <button
@@ -238,25 +259,32 @@ const HKIForm: React.FC = () => {
                   Tambah
                 </button>
               </div>
-              {errors.authors && <p className="mt-1 text-sm text-red-600">{errors.authors}</p>}
+              {errors.authors && (
+                <p className="mt-1 text-sm text-red-600">{errors.authors}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="driveUrl" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="driveUrl"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Link Google Drive <span className="text-red-500">*</span>
               </label>
               <input
                 type="url"
                 id="driveUrl"
                 name="driveUrl"
-                value={hki.driveUrl || ''}
+                value={hki.driveUrl || ""}
                 onChange={handleChange}
                 placeholder="https://drive.google.com/..."
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.driveUrl ? 'border-red-300' : 'border-gray-300'
+                  errors.driveUrl ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
               />
-              {errors.driveUrl && <p className="mt-1 text-sm text-red-600">{errors.driveUrl}</p>}
+              {errors.driveUrl && (
+                <p className="mt-1 text-sm text-red-600">{errors.driveUrl}</p>
+              )}
             </div>
           </div>
 
@@ -271,7 +299,7 @@ const HKIForm: React.FC = () => {
               type="submit"
               className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              {isEditing ? 'Perbarui HKI' : 'Simpan HKI'}
+              {isEditing ? "Perbarui HKI" : "Simpan HKI"}
             </button>
           </div>
         </form>
@@ -280,8 +308,10 @@ const HKIForm: React.FC = () => {
       <ConfirmationDialog
         isOpen={showSaveConfirm}
         title="Konfirmasi Simpan"
-        message={`Apakah Anda yakin ingin ${isEditing ? 'memperbarui' : 'menyimpan'} HKI ini?`}
-        confirmLabel={isEditing ? 'Perbarui' : 'Simpan'}
+        message={`Apakah Anda yakin ingin ${
+          isEditing ? "memperbarui" : "menyimpan"
+        } HKI ini?`}
+        confirmLabel={isEditing ? "Perbarui" : "Simpan"}
         onConfirm={handleConfirmSave}
         onCancel={() => setShowSaveConfirm(false)}
       />

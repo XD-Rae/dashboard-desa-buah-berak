@@ -1,4 +1,21 @@
-import { Faculty, Achievement, Event, Partner, Testimonial, HKI, Patent, IndustrialDesign } from '../types';
+import axios from "axios";
+import {
+  Aparatur, // Mengganti Faculty menjadi Aparatur
+  Achievement,
+  Event,
+  Partner,
+  Testimonial,
+  HKI,
+  Patent,
+  IndustrialDesign,
+  Role,
+  SURAT_KELUAR,
+  SURAT_MASUK,
+  User,
+  Penduduk,
+  Bantuan,
+  Dusun,
+} from "../types";
 
 // API response types
 interface APIResponse<T> {
@@ -14,27 +31,29 @@ interface APIErrorResponse {
 
 // Custom error classes
 class APIError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
     super(message);
-    this.name = 'APIError';
+    this.name = "APIError";
   }
 }
 
 class NetworkError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'NetworkError';
+    this.name = "NetworkError";
   }
 }
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-buah-berak.garnusa.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3008";
 const DEFAULT_TIMEOUT = 30000;
 
 // Remove id fields before sending to API
 const sanitizeData = (data: any) => {
   if (data instanceof FormData) return data;
-  const clone = { ...data };
+  const clone = {...data};
   delete clone._id;
   delete clone.id;
   return clone;
@@ -43,7 +62,7 @@ const sanitizeData = (data: any) => {
 // Handle request timeout
 const fetchWithTimeout = async (
   resource: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<Response> => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
@@ -60,16 +79,19 @@ const fetchWithTimeout = async (
 };
 
 // Main fetch function with error handling
-async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchAPI<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
   try {
     const response = await fetchWithTimeout(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
         ...options?.headers,
       },
-      mode: 'cors',
+      mode: "cors",
     });
 
     if (!response.ok) {
@@ -85,14 +107,14 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
     return data;
   } catch (error: any) {
     if (error instanceof APIError) throw error;
-    if (error.name === 'AbortError') throw new NetworkError('Request timeout');
-    if (!navigator.onLine) throw new NetworkError('No internet connection');
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    if (error.name === "AbortError") throw new NetworkError("Request timeout");
+    if (!navigator.onLine) throw new NetworkError("No internet connection");
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
       throw new NetworkError(`Unable to connect to API at ${API_BASE_URL}`);
     }
 
-    console.error('Unhandled API error:', error);
-    throw new NetworkError('Unexpected error during API request');
+    console.error("Unhandled API error:", error);
+    throw new NetworkError("Unexpected error during API request");
   }
 }
 
@@ -101,53 +123,645 @@ const prepareRequestData = (data: any) => {
   return clean instanceof FormData ? clean : JSON.stringify(clean);
 };
 
-// -------- Faculty API --------
-export const facultyAPI = {
+// -------- Surat Keluar API --------
+export const suratKeluarAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<Faculty[]>>('/api/faculties');
+      const response = await fetchAPI<APIResponse<SURAT_KELUAR[]>>(
+        "/api/surat-keluar/get",
+      );
       return response.data;
     } catch (error) {
-      console.error('Error fetching faculties:', error);
+      console.error("Error fetching surat keluar:", error);
       return [];
     }
   },
 
-  getById: async (_id: string) => {
-    if (!_id) throw new Error('Faculty ID is required');
+  getById: async (id: string) => {
+    if (!id) throw new Error("ID Surat Keluar is required");
     try {
-      const response = await fetchAPI<APIResponse<Faculty>>(`/api/faculties/${_id}`);
+      const response = await fetchAPI<APIResponse<SURAT_KELUAR>>(
+        `/api/surat-keluar/get/${id}`,
+      );
       return response.data;
     } catch (error) {
-      console.error(`Error fetching faculty ${_id}:`, error);
+      console.error(`Error fetching surat keluar ${id}:`, error);
       return undefined;
     }
   },
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Faculty>>('/api/faculties', {
-      method: 'POST',
+
+    const response = await axios.post<APIResponse<SURAT_KELUAR>>(
+      "http://localhost:3008/api/surat-keluar/create",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      {
+        withCredentials: true,
+      },
+    );
+
+    return response.data.data;
+  },
+
+  update: async (id: string, data: any) => {
+    if (!id) throw new Error("ID Surat Keluar is required");
+
+    const body = prepareRequestData(data);
+
+    const response = await axios.put<APIResponse<SURAT_KELUAR>>(
+      `http://localhost:3008/api/surat-keluar/edit/${id}`,
+      body,
+      {
+        withCredentials: true,
+        // Axios akan otomatis menangani boundary jika body adalah FormData
+      },
+    );
+
+    return response.data.data;
+  },
+
+  delete: async (id: string) => {
+    if (!id) throw new Error("ID Surat Keluar is required");
+    await fetchAPI<APIResponse<void>>(`/api/surat-keluar/delete/${id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// -------- Surat Masuk API --------
+export const suratMasukAPI = {
+  getAll: async () => {
+    try {
+      const response = await fetchAPI<APIResponse<SURAT_MASUK[]>>(
+        "/api/surat-masuk/get",
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching surat masuk:", error);
+      return [];
+    }
+  },
+
+  getById: async (id: string) => {
+    if (!id) throw new Error("ID Surat Masuk is required");
+    try {
+      const response = await fetchAPI<APIResponse<SURAT_MASUK>>(
+        `/api/surat-masuk/get/${id}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching surat masuk ${id}:`, error);
+      return undefined;
+    }
+  },
+
+  create: async (data: any) => {
+    const body = prepareRequestData(data);
+
+    const response = await axios.post<APIResponse<SURAT_MASUK>>(
+      "http://localhost:3008/api/surat-masuk/create",
+      body,
+      {
+        withCredentials: true,
+      },
+    );
+
+    return response.data.data;
+  },
+
+  update: async (id: string, data: any) => {
+    if (!id) throw new Error("ID Surat Masuk is required");
+
+    const body = prepareRequestData(data);
+
+    const response = await axios.put<APIResponse<SURAT_MASUK>>(
+      `http://localhost:3008/api/surat-masuk/edit/${id}`,
+      body,
+      {
+        withCredentials: true,
+        // Axios secara otomatis mengatur Content-Type jika body adalah FormData
+      },
+    );
+
+    return response.data.data;
+  },
+
+  delete: async (id: string) => {
+    if (!id) throw new Error("ID Surat Masuk is required");
+    await fetchAPI<APIResponse<void>>(`/api/surat-masuk/delete/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  deleteAll: async () => {
+    await fetchAPI<APIResponse<void>>("/api/surat-masuk/delete-all", {
+      method: "DELETE",
+    });
+  },
+
+  getCount: async () => {
+    const response = await fetchAPI<APIResponse<number>>(
+      "/api/surat-masuk/count",
+    );
+    return response.data;
+  },
+};
+
+export const bantuanAPI = {
+  getAll: async () => {
+    try {
+      const response =
+        await fetchAPI<APIResponse<Bantuan[]>>("/api/penduduk/saw");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching penduduk:", error);
+      return [];
+    }
+  },
+};
+
+// -------- Penduduk API --------
+export const pendudukAPI = {
+  // GET ALL
+  getAll: async () => {
+    try {
+      // Sesuai route controller: router.get("/", getAllPenduduk)
+      const response = await fetchAPI<APIResponse<Penduduk[]>>("/api/penduduk");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching penduduk:", error);
+      return [];
+    }
+  },
+
+  // GET BY ID
+  getById: async (id: string) => {
+    if (!id) throw new Error("ID Penduduk is required");
+    try {
+      const response = await fetchAPI<APIResponse<Penduduk>>(
+        `/api/penduduk/${id}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching penduduk ${id}:`, error);
+      return undefined;
+    }
+  },
+
+  // CREATE (Manual Input)
+  create: async (data: Partial<Penduduk>) => {
+    // Menggunakan fetchAPI atau axios, pastikan endpoint sesuai
+    // Sesuai route controller: router.post("/", createPenduduk)
+
+    // Jika fetchAPI Anda support method POST:
+    /*
+    const response = await fetchAPI<APIResponse<Penduduk>>("/api/penduduk", {
+       method: "POST",
+       body: JSON.stringify(data),
+       headers: { "Content-Type": "application/json" }
+    });
+    return response.data;
+    */
+
+    // Menggunakan Axios (seperti contoh Anda sebelumnya):
+    const response = await axios.post<APIResponse<Penduduk>>(
+      "http://localhost:3008/api/penduduk", // Sesuaikan port backend
+      data,
+      {
+        withCredentials: true, // Jika butuh cookie/session
+      },
+    );
+
+    return response.data.data;
+  },
+
+  // UPDATE
+  update: async (id: string, data: Partial<Penduduk>) => {
+    if (!id) throw new Error("ID Penduduk is required");
+
+    // Sesuai route controller: router.put("/:id", updatePenduduk)
+    const response = await fetchAPI<APIResponse<Penduduk>>(
+      `/api/penduduk/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data), // Pastikan dikirim sebagai JSON string
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    return response.data;
+  },
+
+  // DELETE
+  delete: async (id: string) => {
+    if (!id) throw new Error("ID Penduduk is required");
+    // Sesuai route controller: router.delete("/:id", deletePenduduk)
+    await fetchAPI<APIResponse<void>>(`/api/penduduk/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // IMPORT EXCEL (Fitur Baru)
+  importExcel: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axios.post<APIResponse<Penduduk[]>>(
+      "http://localhost:3008/api/penduduk/import",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      },
+    );
+
+    return response.data;
+  },
+};
+
+// -------- Aparatur API (Renamed from Faculty) --------
+export const aparaturAPI = {
+  getAll: async () => {
+    try {
+      const response = await fetchAPI<APIResponse<Aparatur[]>>("/api/aparatur");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching aparatur:", error);
+      return [];
+    }
+  },
+
+  getById: async (_id: string) => {
+    if (!_id) throw new Error("Aparatur ID is required");
+    try {
+      const response = await fetchAPI<APIResponse<Aparatur>>(
+        `/api/aparatur/${_id}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching aparatur ${_id}:`, error);
+      return undefined;
+    }
+  },
+
+  create: async (data: any) => {
+    const body = prepareRequestData(data);
+    const response = await fetchAPI<APIResponse<Aparatur>>("/api/aparatur", {
+      method: "POST",
+      body,
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Faculty ID is required');
+    if (!_id) throw new Error("Aparatur ID is required");
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Faculty>>(`/api/faculties/${_id}`, {
-      method: 'PUT',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Aparatur>>(
+      `/api/aparatur/${_id}`,
+      {
+        method: "PUT",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Faculty ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/faculties/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Aparatur ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/aparatur/${_id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// -------- Dusun API --------
+export const dusunAPI = {
+  // GET ALL
+  getAll: async () => {
+    try {
+      const response = await fetchAPI<APIResponse<Dusun[]>>("/api/dusun");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching dusun:", error);
+      return [];
+    }
+  },
+
+  // GET BY ID (UUID)
+  getById: async (id: string) => {
+    if (!id) throw new Error("ID Dusun is required");
+    try {
+      // id di sini adalah idDusun (UUID), bukan _id Mongo
+      const response = await fetchAPI<APIResponse<Dusun>>(`/api/dusun/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching dusun ${id}:`, error);
+      return undefined;
+    }
+  },
+
+  // CREATE
+  create: async (data: Partial<Dusun>) => {
+    const body = prepareRequestData(data);
+    const response = await fetchAPI<APIResponse<Dusun>>("/api/dusun", {
+      method: "POST",
+      body,
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
+    });
+    return response.data;
+  },
+
+  // UPDATE
+  update: async (id: string, data: Partial<Dusun>) => {
+    if (!id) throw new Error("ID Dusun is required");
+    const body = prepareRequestData(data);
+
+    const response = await fetchAPI<APIResponse<Dusun>>(`/api/dusun/${id}`, {
+      method: "PUT",
+      body,
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
+    });
+    return response.data;
+  },
+
+  // DELETE
+  delete: async (id: string) => {
+    if (!id) throw new Error("ID Dusun is required");
+    await fetchAPI<APIResponse<void>>(`/api/dusun/${id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// -------- Roles API --------
+export const roleAPI = {
+  // GET /api/roles
+  getAll: async () => {
+    try {
+      const response = await fetchAPI<APIResponse<Role[]>>("/api/roles");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      return [];
+    }
+  },
+
+  // GET /api/roles/:id
+  getById: async (_id: string) => {
+    if (!_id) throw new Error("Role ID is required");
+    try {
+      const response = await fetchAPI<APIResponse<Role>>(`/api/roles/${_id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching role ${_id}:`, error);
+      return undefined;
+    }
+  },
+
+  // POST /api/roles
+  create: async (data: Omit<Role, "_id">) => {
+    const response = await fetchAPI<APIResponse<Role>>("/api/roles", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // PUT /api/roles/:id
+  update: async (_id: string, data: Partial<Role>) => {
+    if (!_id) throw new Error("Role ID is required");
+
+    const response = await fetchAPI<APIResponse<Role>>(`/api/roles/${_id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // DELETE /api/roles/:id
+  delete: async (_id: string) => {
+    if (!_id) throw new Error("Role ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/roles/${_id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// -------- Users API --------
+export const userAPI = {
+  // GET /api/users
+  getAll: async () => {
+    try {
+      const response = await fetchAPI<APIResponse<User[]>>("/api/users");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return [];
+    }
+  },
+
+  // GET /api/users/:id
+  getById: async (id: string) => {
+    if (!id) throw new Error("User ID is required");
+    try {
+      const response = await fetchAPI<APIResponse<User>>(`/api/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching user ${id}:`, error);
+      return undefined;
+    }
+  },
+
+  // POST /api/users
+  create: async (data: Omit<User, "_id">) => {
+    console.log(data);
+    const response = await fetchAPI<APIResponse<User>>("/api/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // PUT /api/users/:id
+  update: async (id: string, data: Partial<User>) => {
+    if (!id) throw new Error("User ID is required");
+
+    const response = await fetchAPI<APIResponse<User>>(`/api/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // DELETE /api/users/:id
+  delete: async (id: string) => {
+    if (!id) throw new Error("User ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/users/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // POST /api/users/login
+  login: async (data: {email: string; password: string}) => {
+    const response = await fetchAPI<APIResponse<any>>("/api/users/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // POST /api/users/refreshToken
+  refreshToken: async () => {
+    const response = await fetchAPI<APIResponse<any>>(
+      "/api/users/refreshToken",
+      {
+        method: "POST",
+      },
+    );
+    return response.data;
+  },
+
+  // POST /api/users/logout
+  logout: async () => {
+    await fetchAPI<APIResponse<void>>("/api/users/logout", {
+      method: "POST",
+    });
+  },
+
+  changeName: async (id: string, data: { newName: string }) => {
+    if (!id) throw new Error("User ID is required");
+
+    const response = await fetchAPI<APIResponse<any>>(`/api/users/${id}/change-name`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response; // Return full response untuk cek status success/fail di komponen
+  },
+
+  // PUT /api/users/:id/change-password
+  changePassword: async (id: string, data: { oldPassword: string; newPassword: string }) => {
+    if (!id) throw new Error("User ID is required");
+
+    const response = await fetchAPI<APIResponse<any>>(`/api/users/${id}/change-password`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
+  },
+};
+
+// -------- Reports API --------
+export const reportAPI = {
+  getAll: async () => {
+    const res = await fetchAPI<{data: any[]}>("/api/reports");
+    return res.data;
+  },
+
+  addTindakLanjut: async (id: string, data: {tindak_lanjut: string}) => {
+    const response = await fetchAPI<APIResponse<any>>(
+      `/api/reports/${id}/tindak-lanjut`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    return response.data;
+  },
+
+  getById: async (id: string) => {
+    const res = await fetchAPI<{data: any}>(`/api/reports/${id}`);
+    return res.data;
+  },
+
+  create: async (formData: FormData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reports`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err?.error || `HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("API create report error:", error);
+      throw error;
+    }
+  },
+
+  update: async (id: string, formData: FormData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("API update report error:", error);
+      throw error;
+    }
+  },
+
+  updateStatus: async (id: string, status: string) => {
+    // Sesuaikan endpoint dengan route backend yang kita buat: /api/reports/:id/status
+    const response = await fetchAPI<APIResponse<any>>(
+      `/api/reports/${id}/status`,
+      {
+        method: "PUT",
+        body: JSON.stringify({status}),
+        headers: {"Content-Type": "application/json"},
+      },
+    );
+    return response.data;
+  },
+
+  delete: async (_id: string) => {
+    if (!_id) throw new Error("Reports ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/reports/${_id}`, {
+      method: "DELETE",
+    });
   },
 };
 
@@ -155,18 +769,21 @@ export const facultyAPI = {
 export const achievementAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<Achievement[]>>('/api/achievements');
+      const response =
+        await fetchAPI<APIResponse<Achievement[]>>("/api/achievements");
       return response.data;
     } catch (error) {
-      console.error('Error fetching achievements:', error);
+      console.error("Error fetching achievements:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('Achievement ID is required');
+    if (!_id) throw new Error("Achievement ID is required");
     try {
-      const response = await fetchAPI<APIResponse<Achievement>>(`/api/achievements/${_id}`);
+      const response = await fetchAPI<APIResponse<Achievement>>(
+        `/api/achievements/${_id}`,
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching achievement ${_id}:`, error);
@@ -176,28 +793,38 @@ export const achievementAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Achievement>>('/api/achievements', {
-      method: 'POST',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Achievement>>(
+      "/api/achievements",
+      {
+        method: "POST",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Achievement ID is required');
+    if (!_id) throw new Error("Achievement ID is required");
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Achievement>>(`/api/achievements/${_id}`, {
-      method: 'PUT',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Achievement>>(
+      `/api/achievements/${_id}`,
+      {
+        method: "PUT",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Achievement ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/achievements/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Achievement ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/achievements/${_id}`, {
+      method: "DELETE",
+    });
   },
 };
 
@@ -205,16 +832,16 @@ export const achievementAPI = {
 export const eventAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<Event[]>>('/api/events');
+      const response = await fetchAPI<APIResponse<Event[]>>("/api/events");
       return response.data;
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error("Error fetching events:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('Event ID is required');
+    if (!_id) throw new Error("Event ID is required");
     try {
       const response = await fetchAPI<APIResponse<Event>>(`/api/events/${_id}`);
       return response.data;
@@ -226,28 +853,30 @@ export const eventAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Event>>('/api/events', {
-      method: 'POST',
+    const response = await fetchAPI<APIResponse<Event>>("/api/events", {
+      method: "POST",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Event ID is required');
+    if (!_id) throw new Error("Event ID is required");
     const body = prepareRequestData(data);
     const response = await fetchAPI<APIResponse<Event>>(`/api/events/${_id}`, {
-      method: 'PUT',
+      method: "PUT",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Event ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/events/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Event ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/events/${_id}`, {method: "DELETE"});
   },
 };
 
@@ -255,18 +884,20 @@ export const eventAPI = {
 export const partnerAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<Partner[]>>('/api/partners');
+      const response = await fetchAPI<APIResponse<Partner[]>>("/api/partners");
       return response.data;
     } catch (error) {
-      console.error('Error fetching partners:', error);
+      console.error("Error fetching partners:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('Partner ID is required');
+    if (!_id) throw new Error("Partner ID is required");
     try {
-      const response = await fetchAPI<APIResponse<Partner>>(`/api/partners/${_id}`);
+      const response = await fetchAPI<APIResponse<Partner>>(
+        `/api/partners/${_id}`,
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching partner ${_id}:`, error);
@@ -276,28 +907,35 @@ export const partnerAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Partner>>('/api/partners', {
-      method: 'POST',
+    const response = await fetchAPI<APIResponse<Partner>>("/api/partners", {
+      method: "POST",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Partner ID is required');
+    if (!_id) throw new Error("Partner ID is required");
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Partner>>(`/api/partners/${_id}`, {
-      method: 'PUT',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Partner>>(
+      `/api/partners/${_id}`,
+      {
+        method: "PUT",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Partner ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/partners/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Partner ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/partners/${_id}`, {
+      method: "DELETE",
+    });
   },
 };
 
@@ -305,18 +943,21 @@ export const partnerAPI = {
 export const testimonialAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<Testimonial[]>>('/api/testimonials');
+      const response =
+        await fetchAPI<APIResponse<Testimonial[]>>("/api/testimonials");
       return response.data;
     } catch (error) {
-      console.error('Error fetching testimonials:', error);
+      console.error("Error fetching testimonials:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('Testimonial ID is required');
+    if (!_id) throw new Error("Testimonial ID is required");
     try {
-      const response = await fetchAPI<APIResponse<Testimonial>>(`/api/testimonials/${_id}`);
+      const response = await fetchAPI<APIResponse<Testimonial>>(
+        `/api/testimonials/${_id}`,
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching testimonial ${_id}:`, error);
@@ -326,28 +967,38 @@ export const testimonialAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Testimonial>>('/api/testimonials', {
-      method: 'POST',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Testimonial>>(
+      "/api/testimonials",
+      {
+        method: "POST",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Testimonial ID is required');
+    if (!_id) throw new Error("Testimonial ID is required");
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Testimonial>>(`/api/testimonials/${_id}`, {
-      method: 'PUT',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Testimonial>>(
+      `/api/testimonials/${_id}`,
+      {
+        method: "PUT",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Testimonial ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/testimonials/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Testimonial ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/testimonials/${_id}`, {
+      method: "DELETE",
+    });
   },
 };
 
@@ -355,16 +1006,16 @@ export const testimonialAPI = {
 export const hkiAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<HKI[]>>('/api/hki');
+      const response = await fetchAPI<APIResponse<HKI[]>>("/api/hki");
       return response.data;
     } catch (error) {
-      console.error('Error fetching HKI:', error);
+      console.error("Error fetching HKI:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('HKI ID is required');
+    if (!_id) throw new Error("HKI ID is required");
     try {
       const response = await fetchAPI<APIResponse<HKI>>(`/api/hki/${_id}`);
       return response.data;
@@ -376,28 +1027,30 @@ export const hkiAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<HKI>>('/api/hki', {
-      method: 'POST',
+    const response = await fetchAPI<APIResponse<HKI>>("/api/hki", {
+      method: "POST",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('HKI ID is required');
+    if (!_id) throw new Error("HKI ID is required");
     const body = prepareRequestData(data);
     const response = await fetchAPI<APIResponse<HKI>>(`/api/hki/${_id}`, {
-      method: 'PUT',
+      method: "PUT",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('HKI ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/hki/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("HKI ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/hki/${_id}`, {method: "DELETE"});
   },
 };
 
@@ -405,18 +1058,20 @@ export const hkiAPI = {
 export const patentAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<Patent[]>>('/api/patents');
+      const response = await fetchAPI<APIResponse<Patent[]>>("/api/patents");
       return response.data;
     } catch (error) {
-      console.error('Error fetching patents:', error);
+      console.error("Error fetching patents:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('Patent ID is required');
+    if (!_id) throw new Error("Patent ID is required");
     try {
-      const response = await fetchAPI<APIResponse<Patent>>(`/api/patents/${_id}`);
+      const response = await fetchAPI<APIResponse<Patent>>(
+        `/api/patents/${_id}`,
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching patent ${_id}:`, error);
@@ -426,28 +1081,35 @@ export const patentAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Patent>>('/api/patents', {
-      method: 'POST',
+    const response = await fetchAPI<APIResponse<Patent>>("/api/patents", {
+      method: "POST",
       body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
+      headers:
+        data instanceof FormData ? {} : {"Content-Type": "application/json"},
     });
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Patent ID is required');
+    if (!_id) throw new Error("Patent ID is required");
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<Patent>>(`/api/patents/${_id}`, {
-      method: 'PUT',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<Patent>>(
+      `/api/patents/${_id}`,
+      {
+        method: "PUT",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Patent ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/patents/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Patent ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/patents/${_id}`, {
+      method: "DELETE",
+    });
   },
 };
 
@@ -455,18 +1117,22 @@ export const patentAPI = {
 export const industrialDesignAPI = {
   getAll: async () => {
     try {
-      const response = await fetchAPI<APIResponse<IndustrialDesign[]>>('/api/industrial-designs');
+      const response = await fetchAPI<APIResponse<IndustrialDesign[]>>(
+        "/api/industrial-designs",
+      );
       return response.data;
     } catch (error) {
-      console.error('Error fetching industrial designs:', error);
+      console.error("Error fetching industrial designs:", error);
       return [];
     }
   },
 
   getById: async (_id: string) => {
-    if (!_id) throw new Error('Industrial Design ID is required');
+    if (!_id) throw new Error("Industrial Design ID is required");
     try {
-      const response = await fetchAPI<APIResponse<IndustrialDesign>>(`/api/industrial-designs/${_id}`);
+      const response = await fetchAPI<APIResponse<IndustrialDesign>>(
+        `/api/industrial-designs/${_id}`,
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching industrial design ${_id}:`, error);
@@ -476,29 +1142,39 @@ export const industrialDesignAPI = {
 
   create: async (data: any) => {
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<IndustrialDesign>>('/api/industrial-designs', {
-      method: 'POST',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<IndustrialDesign>>(
+      "/api/industrial-designs",
+      {
+        method: "POST",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   update: async (_id: string, data: any) => {
-    if (!_id) throw new Error('Industrial Design ID is required');
+    if (!_id) throw new Error("Industrial Design ID is required");
     const body = prepareRequestData(data);
-    const response = await fetchAPI<APIResponse<IndustrialDesign>>(`/api/industrial-designs/${_id}`, {
-      method: 'PUT',
-      body,
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json' },
-    });
+    const response = await fetchAPI<APIResponse<IndustrialDesign>>(
+      `/api/industrial-designs/${_id}`,
+      {
+        method: "PUT",
+        body,
+        headers:
+          data instanceof FormData ? {} : {"Content-Type": "application/json"},
+      },
+    );
     return response.data;
   },
 
   delete: async (_id: string) => {
-    if (!_id) throw new Error('Industrial Design ID is required');
-    await fetchAPI<APIResponse<void>>(`/api/industrial-designs/${_id}`, { method: 'DELETE' });
+    if (!_id) throw new Error("Industrial Design ID is required");
+    await fetchAPI<APIResponse<void>>(`/api/industrial-designs/${_id}`, {
+      method: "DELETE",
+    });
   },
 };
 
-export { APIError, NetworkError };
+export {APIError, NetworkError};

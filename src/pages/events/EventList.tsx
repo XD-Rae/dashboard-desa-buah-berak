@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { Plus, Search, Eye, Edit, Trash2, Calendar } from 'lucide-react';
-import toast from 'react-hot-toast';
-import ConfirmationDialog from '../../components/shared/ConfirmationDialog';
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {Plus, Search, Eye, Edit, Trash2, Calendar} from "lucide-react";
+import toast from "react-hot-toast";
+import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
 
 const EventList: React.FC = () => {
-  const { events, deleteEvent } = useCampusData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<{ _id: string; nama: string } | null>(null);
+  const {events, deleteEvent} = useDataContext();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState<{
+    _id: string;
+    nama: string;
+  } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const filteredEvents = events.filter((event) =>
-    event.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.deskripsi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.lokasi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.jenis.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvents = events.filter(
+    (event) =>
+      event.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.deskripsi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.lokasi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.jenis.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleDeleteClick = (event: { _id: string; nama: string }) => {
+  const handleDeleteClick = (event: {_id: string; nama: string}) => {
     setSelectedEvent(event);
     setShowDeleteConfirm(true);
   };
@@ -28,12 +32,12 @@ const EventList: React.FC = () => {
 
     try {
       await deleteEvent(selectedEvent._id);
-      toast.success('Kegiatan berhasil dihapus');
+      toast.success("Kegiatan berhasil dihapus");
       setShowDeleteConfirm(false);
       setSelectedEvent(null);
     } catch (error) {
-      console.error('Error deleting event:', error);
-      toast.error('Gagal menghapus kegiatan');
+      console.error("Error deleting event:", error);
+      toast.error("Gagal menghapus kegiatan");
     }
   };
 
@@ -53,7 +57,10 @@ const EventList: React.FC = () => {
       {/* Search */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari kegiatan..."
@@ -72,25 +79,34 @@ const EventList: React.FC = () => {
               key={event._id}
               className="overflow-hidden rounded-lg bg-white shadow-md transition-shadow hover:shadow-lg"
             >
-              <div 
+              <div
                 className="h-48 w-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${event.foto || 'https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg'})` }}
+                style={{
+                  backgroundImage: `url(${
+                    event.foto ||
+                    "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg"
+                  })`,
+                }}
               />
               <div className="p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">{event.nama}</h3>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {event.nama}
+                  </h3>
                   <span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">
                     {event.jenis}
                   </span>
                 </div>
-                
+
                 <div className="mb-3 flex items-center text-sm text-gray-500">
                   <Calendar size={16} className="mr-1" />
                   <span>{event.tanggal}</span>
                 </div>
-                
-                <p className="mb-4 text-sm text-gray-600 line-clamp-2">{event.deskripsi}</p>
-                
+
+                <p className="mb-4 text-sm text-gray-600 line-clamp-2">
+                  {event.deskripsi}
+                </p>
+
                 <div className="flex justify-end space-x-2">
                   <Link
                     to={`/events/${event._id}`}
@@ -121,7 +137,9 @@ const EventList: React.FC = () => {
       ) : (
         <div className="rounded-lg bg-white p-8 text-center shadow-md">
           <Calendar size={48} className="mx-auto mb-4 text-indigo-300" />
-          <h3 className="mb-2 text-xl font-medium text-gray-900">Tidak ada kegiatan</h3>
+          <h3 className="mb-2 text-xl font-medium text-gray-900">
+            Tidak ada kegiatan
+          </h3>
           <p className="mb-4 text-gray-600">
             Belum ada data kegiatan yang tersedia atau sesuai dengan pencarian.
           </p>

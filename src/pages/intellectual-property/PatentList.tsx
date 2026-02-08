@@ -1,27 +1,38 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { Plus, Search, Edit, Trash2, FileText, Users, Calendar } from 'lucide-react';
-import toast from 'react-hot-toast';
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  FileText,
+  Users,
+  Calendar,
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 const PatentList: React.FC = () => {
-  const { patents = [], deletePatent } = useCampusData();
-  const [searchTerm, setSearchTerm] = useState('');
+  const {patents = [], deletePatent} = useDataContext();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredPatents = patents.filter((patent) =>
-    patent.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patent.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    patent.number.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPatents = patents.filter(
+    (patent) =>
+      patent.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patent.authors.some((author) =>
+        author.toLowerCase().includes(searchTerm.toLowerCase()),
+      ) ||
+      patent.number.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleDelete = async (_id: string, title: string) => {
     if (window.confirm(`Anda yakin ingin menghapus paten "${title}"?`)) {
       try {
         await deletePatent(_id);
-        toast.success('Paten berhasil dihapus');
+        toast.success("Paten berhasil dihapus");
       } catch (error) {
-        console.error('Error deleting patent:', error);
-        toast.error('Gagal menghapus paten');
+        console.error("Error deleting patent:", error);
+        toast.error("Gagal menghapus paten");
       }
     }
   };
@@ -42,7 +53,10 @@ const PatentList: React.FC = () => {
       {/* Search */}
       <div className="mb-6">
         <div className="relative">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={20}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari berdasarkan judul, penulis, atau nomor..."
@@ -59,35 +73,59 @@ const PatentList: React.FC = () => {
           <table className="min-w-full table-auto">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">No.</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Judul</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Nomor</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Penulis</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tanggal</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Akses</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Aksi</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  No.
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Judul
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Nomor
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Penulis
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Tanggal
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Akses
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Aksi
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredPatents.map((patent, index) => (
                 <tr key={patent._id} className="border-t">
-                  <td className="px-4 py-2 text-sm text-gray-900">{index + 1}</td> {/* Serial Number */}
-                  <td className="px-4 py-2 text-sm text-gray-900">{patent.title}</td>
-                  <td className="px-4 py-2 text-sm text-gray-900">{patent.number}</td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {index + 1}
+                  </td>{" "}
+                  {/* Serial Number */}
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {patent.title}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {patent.number}
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
                     {patent.authors.map((author, idx) => (
                       <div key={idx} className="flex items-start">
                         {/* Bullet Point before the author */}
                         <span className="mr-1 text-indigo-800 text-xs">
                           {/* Bullet point (•) */}
-                          {'• '}
+                          {"• "}
                           {author}
                         </span>
-                        {idx < patent.authors.length - 1 && <br />} {/* Adds a line break between authors */}
+                        {idx < patent.authors.length - 1 && <br />}{" "}
+                        {/* Adds a line break between authors */}
                       </div>
                     ))}
                   </td>
-                  <td className="px-4 py-2 text-sm text-gray-900">{patent.date}</td>
+                  <td className="px-4 py-2 text-sm text-gray-900">
+                    {patent.date}
+                  </td>
                   <td className="px-4 py-2 text-sm text-gray-900">
                     {patent.driveUrl && (
                       <a
@@ -127,7 +165,9 @@ const PatentList: React.FC = () => {
       ) : (
         <div className="rounded-lg bg-white p-8 text-center shadow-md">
           <FileText size={48} className="mx-auto mb-4 text-indigo-300" />
-          <h3 className="mb-2 text-xl font-medium text-gray-900">Tidak ada data paten</h3>
+          <h3 className="mb-2 text-xl font-medium text-gray-900">
+            Tidak ada data paten
+          </h3>
           <p className="mb-4 text-gray-600">
             Belum ada data paten yang tersedia atau sesuai dengan pencarian.
           </p>

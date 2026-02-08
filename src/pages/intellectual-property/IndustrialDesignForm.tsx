@@ -1,35 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useCampusData } from '../../contexts/CampusDataContext';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { IndustrialDesign } from '../../types';
-import DatePicker from 'react-datepicker';
+import React, {useState, useEffect} from "react";
+import {useParams, useNavigate, Link} from "react-router-dom";
+import {useDataContext} from "../../contexts/DataContext";
+import {ArrowLeft, Plus, Trash2} from "lucide-react";
+import toast from "react-hot-toast";
+import {IndustrialDesign} from "../../types";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import ConfirmationDialog from '../../components/shared/ConfirmationDialog';
+import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
 
 const emptyDesign: IndustrialDesign = {
-  _id: '',
-  title: '',
-  date: '',
-  number: '',
+  _id: "",
+  title: "",
+  date: "",
+  number: "",
   authors: [],
-  driveUrl: '',
+  driveUrl: "",
 };
 
 const IndustrialDesignForm: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
-  const { addIndustrialDesign, updateIndustrialDesign, getIndustrialDesignById } = useCampusData();
-  
+  const {addIndustrialDesign, updateIndustrialDesign, getIndustrialDesignById} =
+    useDataContext();
+
   const [design, setDesign] = useState<IndustrialDesign>(emptyDesign);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [newAuthor, setNewAuthor] = useState('');
+  const [newAuthor, setNewAuthor] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  
+
   const isEditing = !!id;
-  
+
   useEffect(() => {
     const fetchData = async () => {
       if (isEditing && id) {
@@ -39,13 +40,13 @@ const IndustrialDesignForm: React.FC = () => {
             setDesign(existingDesign);
             setSelectedDate(new Date(existingDesign.date));
           } else {
-            navigate('/industrial-designs');
-            toast.error('Desain industri tidak ditemukan');
+            navigate("/industrial-designs");
+            toast.error("Desain industri tidak ditemukan");
           }
         } catch (error) {
-          console.error('Error fetching industrial design:', error);
-          toast.error('Gagal mengambil data desain industri');
-          navigate('/industrial-designs');
+          console.error("Error fetching industrial design:", error);
+          toast.error("Gagal mengambil data desain industri");
+          navigate("/industrial-designs");
         }
       }
     };
@@ -54,59 +55,62 @@ const IndustrialDesignForm: React.FC = () => {
   }, [id, getIndustrialDesignById, navigate, isEditing]);
 
   const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!design.title.trim()) newErrors.title = 'Judul desain industri wajib diisi';
-    if (!selectedDate) newErrors.date = 'Tanggal wajib diisi';
-    if (!design.number.trim()) newErrors.number = 'Nomor desain industri wajib diisi';
-    if (design.authors.length === 0) newErrors.authors = 'Minimal satu penulis wajib diisi';
-    if (!design.driveUrl.trim()) newErrors.driveUrl= 'URL wajib diisi';
-    
+
+    if (!design.title.trim())
+      newErrors.title = "Judul desain industri wajib diisi";
+    if (!selectedDate) newErrors.date = "Tanggal wajib diisi";
+    if (!design.number.trim())
+      newErrors.number = "Nomor desain industri wajib diisi";
+    if (design.authors.length === 0)
+      newErrors.authors = "Minimal satu penulis wajib diisi";
+    if (!design.driveUrl.trim()) newErrors.driveUrl = "URL wajib diisi";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setDesign((prev) => ({ ...prev, [name]: value }));
+    const {name, value} = e.target;
+    setDesign((prev) => ({...prev, [name]: value}));
   };
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
     if (date) {
-      setDesign(prev => ({
+      setDesign((prev) => ({
         ...prev,
-        date: formatDate(date)
+        date: formatDate(date),
       }));
     }
   };
 
   const handleAddAuthor = () => {
-    if (newAuthor.trim() !== '') {
+    if (newAuthor.trim() !== "") {
       setDesign((prev) => ({
         ...prev,
-        authors: [...prev.authors, newAuthor.trim()]
+        authors: [...prev.authors, newAuthor.trim()],
       }));
-      setNewAuthor('');
-      setErrors(prev => ({ ...prev, authors: undefined }));
+      setNewAuthor("");
+      setErrors((prev) => ({...prev, authors: undefined}));
     }
   };
 
   const handleRemoveAuthor = (index: number) => {
     setDesign((prev) => ({
       ...prev,
-      authors: prev.authors.filter((_, i) => i !== index)
+      authors: prev.authors.filter((_, i) => i !== index),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error('Periksa kembali inputan!');
+      toast.error("Periksa kembali inputan!");
       return;
     }
     setShowSaveConfirm(true);
@@ -116,25 +120,28 @@ const IndustrialDesignForm: React.FC = () => {
     try {
       if (isEditing && id) {
         await updateIndustrialDesign(id, design);
-        toast.success('Desain industri berhasil diperbarui');
+        toast.success("Desain industri berhasil diperbarui");
       } else {
         await addIndustrialDesign(design);
-        toast.success('Desain industri berhasil ditambahkan');
+        toast.success("Desain industri berhasil ditambahkan");
       }
-      navigate('/industrial-designs');
+      navigate("/industrial-designs");
     } catch (err) {
-      toast.error('Terjadi kesalahan saat menyimpan data');
+      toast.error("Terjadi kesalahan saat menyimpan data");
     }
   };
 
   return (
     <div>
       <div className="mb-6 flex items-center">
-        <Link to="/industrial-designs" className="mr-4 text-gray-500 hover:text-gray-700">
+        <Link
+          to="/industrial-designs"
+          className="mr-4 text-gray-500 hover:text-gray-700"
+        >
           <ArrowLeft size={20} />
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">
-          {isEditing ? 'Edit Desain Industri' : 'Tambah Desain Industri Baru'}
+          {isEditing ? "Edit Desain Industri" : "Tambah Desain Industri Baru"}
         </h1>
       </div>
 
@@ -142,7 +149,10 @@ const IndustrialDesignForm: React.FC = () => {
         <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-1 gap-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Judul Desain Industri <span className="text-red-500">*</span>
               </label>
               <input
@@ -152,14 +162,19 @@ const IndustrialDesignForm: React.FC = () => {
                 value={design.title}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.title ? 'border-red-300' : 'border-gray-300'
+                  errors.title ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
               />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Tanggal <span className="text-red-500">*</span>
               </label>
               <DatePicker
@@ -167,15 +182,20 @@ const IndustrialDesignForm: React.FC = () => {
                 onChange={handleDateChange}
                 dateFormat="yyyy-MM-dd"
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.date ? 'border-red-300' : 'border-gray-300'
+                  errors.date ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
                 placeholderText="Pilih tanggal"
               />
-              {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date}</p>}
+              {errors.date && (
+                <p className="mt-1 text-sm text-red-600">{errors.date}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="number" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="number"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Nomor Desain Industri <span className="text-red-500">*</span>
               </label>
               <input
@@ -185,22 +205,29 @@ const IndustrialDesignForm: React.FC = () => {
                 value={design.number}
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.number ? 'border-red-300' : 'border-gray-300'
+                  errors.number ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
               />
-              {errors.number && <p className="mt-1 text-sm text-red-600">{errors.number}</p>}
+              {errors.number && (
+                <p className="mt-1 text-sm text-red-600">{errors.number}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Penulis <span className="text-red-500">*</span>
               </label>
-              
+
               {design.authors.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2">
                   {design.authors.map((author, index) => (
-                    <div key={index} className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1">
-                      <span className="text-sm font-medium text-indigo-800">{author}</span>
+                    <div
+                      key={index}
+                      className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1"
+                    >
+                      <span className="text-sm font-medium text-indigo-800">
+                        {author}
+                      </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveAuthor(index)}
@@ -212,21 +239,21 @@ const IndustrialDesignForm: React.FC = () => {
                   ))}
                 </div>
               )}
-              
+
               <div className="flex">
                 <input
                   type="text"
                   value={newAuthor}
                   onChange={(e) => setNewAuthor(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddAuthor();
                     }
                   }}
                   placeholder="Nama penulis"
                   className={`block w-full rounded-l-md border ${
-                    errors.authors ? 'border-red-300' : 'border-gray-300'
+                    errors.authors ? "border-red-300" : "border-gray-300"
                   } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
                 />
                 <button
@@ -238,26 +265,32 @@ const IndustrialDesignForm: React.FC = () => {
                   Tambah
                 </button>
               </div>
-              {errors.authors && <p className="mt-1 text-sm text-red-600">{errors.authors}</p>}
+              {errors.authors && (
+                <p className="mt-1 text-sm text-red-600">{errors.authors}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="driveUrl" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="driveUrl"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Link Google Drive <span className="text-red-500">*</span>
               </label>
               <input
                 type="url"
                 id="driveUrl"
                 name="driveUrl"
-                value={design.driveUrl || ''}
-                
+                value={design.driveUrl || ""}
                 onChange={handleChange}
                 placeholder="https://drive.google.com/..."
                 className={`mt-1 block w-full rounded-md border ${
-                  errors.driveUrl ? 'border-red-300' : 'border-gray-300'
+                  errors.driveUrl ? "border-red-300" : "border-gray-300"
                 } px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}
               />
-              {errors.driveUrl && <p className="mt-1 text-sm text-red-600">{errors.driveUrl}</p>}
+              {errors.driveUrl && (
+                <p className="mt-1 text-sm text-red-600">{errors.driveUrl}</p>
+              )}
             </div>
           </div>
 
@@ -272,7 +305,9 @@ const IndustrialDesignForm: React.FC = () => {
               type="submit"
               className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              {isEditing ? 'Perbarui Desain Industri' : 'Simpan Desain Industri'}
+              {isEditing
+                ? "Perbarui Desain Industri"
+                : "Simpan Desain Industri"}
             </button>
           </div>
         </form>
@@ -281,8 +316,10 @@ const IndustrialDesignForm: React.FC = () => {
       <ConfirmationDialog
         isOpen={showSaveConfirm}
         title="Konfirmasi Simpan"
-        message={`Apakah Anda yakin ingin ${isEditing ? 'memperbarui' : 'menyimpan'} desain industri ini?`}
-        confirmLabel={isEditing ? 'Perbarui' : 'Simpan'}
+        message={`Apakah Anda yakin ingin ${
+          isEditing ? "memperbarui" : "menyimpan"
+        } desain industri ini?`}
+        confirmLabel={isEditing ? "Perbarui" : "Simpan"}
         onConfirm={handleConfirmSave}
         onCancel={() => setShowSaveConfirm(false)}
       />
@@ -291,4 +328,3 @@ const IndustrialDesignForm: React.FC = () => {
 };
 
 export default IndustrialDesignForm;
-
