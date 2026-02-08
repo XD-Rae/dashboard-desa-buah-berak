@@ -47,7 +47,7 @@ class NetworkError extends Error {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3008";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://api-buah-berak.garnusa.com";
 const DEFAULT_TIMEOUT = 30000;
 
 // Remove id fields before sending to API
@@ -154,7 +154,7 @@ export const suratKeluarAPI = {
     const body = prepareRequestData(data);
 
     const response = await axios.post<APIResponse<SURAT_KELUAR>>(
-      "http://localhost:3008/api/surat-keluar/create",
+      "https://api-buah-berak.garnusa.com/api/surat-keluar/create",
       body,
       {
         withCredentials: true,
@@ -170,7 +170,7 @@ export const suratKeluarAPI = {
     const body = prepareRequestData(data);
 
     const response = await axios.put<APIResponse<SURAT_KELUAR>>(
-      `http://localhost:3008/api/surat-keluar/edit/${id}`,
+      `https://api-buah-berak.garnusa.com/api/surat-keluar/edit/${id}`,
       body,
       {
         withCredentials: true,
@@ -220,7 +220,7 @@ export const suratMasukAPI = {
     const body = prepareRequestData(data);
 
     const response = await axios.post<APIResponse<SURAT_MASUK>>(
-      "http://localhost:3008/api/surat-masuk/create",
+      "https://api-buah-berak.garnusa.com/api/surat-masuk/create",
       body,
       {
         withCredentials: true,
@@ -236,7 +236,7 @@ export const suratMasukAPI = {
     const body = prepareRequestData(data);
 
     const response = await axios.put<APIResponse<SURAT_MASUK>>(
-      `http://localhost:3008/api/surat-masuk/edit/${id}`,
+      `https://api-buah-berak.garnusa.com/api/surat-masuk/edit/${id}`,
       body,
       {
         withCredentials: true,
@@ -326,7 +326,7 @@ export const pendudukAPI = {
 
     // Menggunakan Axios (seperti contoh Anda sebelumnya):
     const response = await axios.post<APIResponse<Penduduk>>(
-      "http://localhost:3008/api/penduduk", // Sesuaikan port backend
+      "https://api-buah-berak.garnusa.com/api/penduduk", // Sesuaikan port backend
       data,
       {
         withCredentials: true, // Jika butuh cookie/session
@@ -369,7 +369,7 @@ export const pendudukAPI = {
     formData.append("file", file);
 
     const response = await axios.post<APIResponse<Penduduk[]>>(
-      "http://localhost:3008/api/penduduk/import",
+      "https://api-buah-berak.garnusa.com/api/penduduk/import",
       formData,
       {
         headers: {

@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const res = await fetch("http://localhost:3008/api/users/login", {
+      const res = await fetch("https://api-buah-berak.garnusa.com/api/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
 
   const logout = async () => {
     try {
-      await fetch("http://localhost:3008/api/users/logout", {
+      await fetch("https://api-buah-berak.garnusa.com/api/users/logout", {
         method: "POST",
         credentials: "include",
       });
